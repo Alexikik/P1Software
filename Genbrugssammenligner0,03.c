@@ -46,23 +46,41 @@ int main(int argc, char* argv[]) {
     fprintf(stderr, "Opened database successfully\n");
   }
 
+  /* Dette kan bruges til at 'slette' fra databasen */
+  //int scanid = 0;
+  //scanf(" %d", &scanid);
+  //char sql_test[MAX_CHAR];
+  //sprintf(sql_test, "UPDATE Mobiltelefoner SET Koebt='Ja' WHERE Id='%d';", scanid);
+  // printf(" %s", sql_test);
+
+  /* Scanner string ind */
+  printf("Hvad vil du sortere efter?\n");
+  char sql_ori[MAX_CHAR];
+  char input[MAX_CHAR]; 
+  scanf(" %s", input);
+  sprintf(sql_ori, "SELECT * from Mobiltelefoner ORDER BY %s", input);  // Combines SQL command with user input
+
+  //sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg); 
+
   /* Ligger kode hen i C variabler */
   /* Erklærer database handle */
   sqlite3_stmt *stmt;
   int ret;
 
+  /* Erklærer struct til opbevaring af data */
   sql_data sql[MAX_GROUP];
   int id = 0;
 
-  ret = sqlite3_prepare_v2(db, "SELECT * FROM Mobiltelefoner", -1, &stmt, NULL);
+  ret = sqlite3_prepare_v2(db, sql_ori, -1, &stmt, NULL);
   ret = sqlite3_step(stmt);
 
+  /* */
   while(ret == SQLITE_ROW){
     strcpy(sql[id].maerke, sqlite3_column_text(stmt, 0));
     sql[id].pris = sqlite3_column_int(stmt, 3);
     
     /* Tester kun for de 20 første */
-    if(id >= 100){
+    if(id >= 20){
       break;
     }
   
@@ -73,6 +91,7 @@ int main(int argc, char* argv[]) {
   /*  */
   sqlite3_finalize(stmt);
 
+  /* Printer 20 af resultaterne */
   int i;
   for ( i = 0; i < id; ++i)
   {
