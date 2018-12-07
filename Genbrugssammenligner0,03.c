@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
   char sql_ori[MAX_CHAR];
   char input[MAX_CHAR]; 
   scanf(" %s", input);
-  sprintf(sql_ori, "SELECT * from Mobiltelefoner ORDER BY %s", input);  // Combines SQL command with user input
+  sprintf(sql_ori, "SELECT * from Mobiltelefon ORDER BY %s", input);  // Combines SQL command with user input
 
   //sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg); 
 
