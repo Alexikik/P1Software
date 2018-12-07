@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	} 
 	else
-		fprintf(stderr, "Opened database successfully\n");
+		fprintf(stderr, "Opened database successfully\n\n");
 
 	
 
@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
 	char sql_command[MAX_CHAR];		// "Blank" SQL command
 	char sql_ori[MAX_CHAR];			// SQL command combined with user input
 
+	printf("[pris]: For prisen.\n\n");
 	printf("Hvad vil du sortere efter?\n");	// Tells the user what to write
 	scanf(" %s", input);					// Reads user input
 	// strcpy(input, "pris");				// User input, written manually for testing purposes
