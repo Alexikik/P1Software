@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sqlite3.h" 
-void ifcreateaccount(sqlite3 *db, int *value);
-void iflogin(sqlite3 *db, int *value) ;
+void ifcreateaccount(sqlite3 *db, int value);
+void iflogin(sqlite3 *db, int value) ;
 static int callback(void *data, int argc, char **argv, char **azColName);
 void giveValue(int*);
 
@@ -29,11 +29,11 @@ int main(void) {
   while (error == 0) {
     scanf("%d", &scan_answer);
     if (scan_answer == 1) {
-      iflogin(db, &value);
+      iflogin(db, value);
       error++;
     }
     else if (scan_answer == 2) {
-      ifcreateaccount(db, &value);
+      ifcreateaccount(db, value);
       error++;
     }
     else {
@@ -43,7 +43,7 @@ int main(void) {
   return 0;
 
 }
-void ifcreateaccount(sqlite3 *db, int *value) {
+void ifcreateaccount(sqlite3 *db, int value) {
   int password_exist = 1, exit;
   char username[20], password[20], sql_one[100];
   const char* data = "Callback function called";
@@ -51,35 +51,35 @@ void ifcreateaccount(sqlite3 *db, int *value) {
   printf("Type a Username\n");
   scanf(" %s", username);
   while (password_exist == 1) {
-      printf("Type a Password\n");
-      scanf(" %s", password);
-      sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
-      sqlite3_stmt *selectstmt_three;
-      int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
-      if(result == SQLITE_OK) {
-        if (sqlite3_step(selectstmt_three) == SQLITE_ROW) {
-          printf("That password already exists. Type another one\n");
-        }
-        else {
-          password_exist = 0;
-          giveValue(value);
-          sprintf(sql_one, "INSERT INTO User VALUES(null, '%s', '%s', %d);", username, password, value );
-          printf("%s\n", sql_one); 
-          exit = sqlite3_exec(db, sql_one, NULL, 0, &messageError);
-          if (exit != SQLITE_OK) {
-            printf("Error Insert\n");
-            sqlite3_free(messageError);
-          }
-          else {
-            printf("Records created successfully\n");
-            /*Get value from database into variable here!*/
-          }       
-        }
+    printf("Type a Password\n");
+    scanf(" %s", password);
+    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
+    sqlite3_stmt *selectstmt_three;
+    int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
+    if(result == SQLITE_OK) {
+      if (sqlite3_step(selectstmt_three) == SQLITE_ROW) {
+        printf("That password already exists. Type another one\n");
       }
-      sqlite3_finalize(selectstmt_three);  
+      else {
+        password_exist = 0;
+        giveValue(&value);
+        sprintf(sql_one, "INSERT INTO User VALUES(null, '%s', '%s', %d);", username, password, value );
+        printf("%s\n", sql_one); 
+        exit = sqlite3_exec(db, sql_one, NULL, 0, &messageError);
+        if (exit != SQLITE_OK) {
+          printf("Error Insert\n");
+          sqlite3_free(messageError);
+          }
+        else {
+          printf("Records created successfully\nWelcome %s", username);
+           /*Get value from database into variable here!*/
+        }       
+      }
     }
+      sqlite3_finalize(selectstmt_three);  
+  }
 }
-void iflogin(sqlite3 *db, int *value) {
+void iflogin(sqlite3 *db, int value) {
   int user_exist = 2, exit, new_account;
   char username[20], password[20], sql_one[100];
   char *messageError = "Something went wrong";
@@ -106,7 +106,7 @@ void iflogin(sqlite3 *db, int *value) {
           scanf("%s", username);
           printf("Type a Password\n");
           scanf("%s", password);
-          giveValue(value);
+          giveValue(&value);
           printf("hej\n");
           sprintf(sql_one, "INSERT INTO User VALUES(null, '%s', '%s', %d);", username, password, value );
           exit = sqlite3_exec(db, sql_one, NULL, 0, &messageError);
@@ -115,8 +115,7 @@ void iflogin(sqlite3 *db, int *value) {
             sqlite3_free(messageError);
           }
           else {
-            printf("Records created successfully\n");
-            printf("Velkommen %s. Du bliver nu sendt videre til programmet\n", username);
+            printf("Records created successfully\nWelcome %s", username);
             /*Get value from database into variable here!*/
             break;
           }
