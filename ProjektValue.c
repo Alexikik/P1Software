@@ -77,8 +77,10 @@ void makeUser(sqlite3 *db, int value) {
     	critical_value = value;         	
         }
       }
+      	sqlite3_finalize(selectstmt_three);  
 
 	}
+
 }
   else if (scan_answer == 1) {
   	while (user_exist == 2) {
@@ -95,9 +97,8 @@ void makeUser(sqlite3 *db, int value) {
        	  user_exist == 1;  //user found
        	  printf("Velkommen %s\n", username);
        	  break;
-       }
         }
-        else {// user not found
+         else  {
           printf("Du er ikke oprettet i systemet. Tastede du forkert? Tast 1 for at oprette en ny konto, tast 0 for at prøve igen\n");
           scanf(" %d", &new_account);
           if (new_account == 1) {
@@ -119,9 +120,11 @@ void makeUser(sqlite3 *db, int value) {
     		  printf("Velkommen %s. Du bliver nu sendt videre til programmet\n", username);
     		  break;
           	}
+      }
+     
        	   }
    		 } 
-    sqlite3_finalize(selectstmt);
+    sqlite3_finalize(selectstmt);     
     printf("Critical Value: %d\n", critical_value);
 
 
