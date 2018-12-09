@@ -3,7 +3,8 @@
 #include <string.h>
 #include "sqlite3.h"
 
-#define MAX_CHAR 1000
+#define MAX_CHAR 100
+#define MAX_GROUP 100
 
 /* Prototyper */
 void buy_product();
@@ -14,6 +15,7 @@ static int index = 1;   // Global int for testing purposes (Indexes the phones w
 /* Struct array */
 typedef struct{
   
+  char maerke[MAX_CHAR];  
 
 }sql_data;
 
@@ -36,30 +38,57 @@ int main(int argc, char* argv[]) {
   const char* data = "Callback function called";
 
   /* Open database */
-  rc = sqlite3_open("Mobiltelefoner.db", &db);
+  rc = sqlite3_open("v2_Mobiltelefoner.db", &db);
   
   if(rc) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     return 0;
   }else{
     fprintf(stderr, "Opened database successfully\n");
-    buy_product();
   }
 
-  /* Print test */
-  char input[MAX_CHAR];     // String for user input (What the user wants to sort by)
-  char sqlone[MAX_CHAR];      // Not used
-  char *sql_ori_pointer;      // Not used
-  char sql_command[MAX_CHAR];   // "Blank" SQL command
-  char sql_ori[MAX_CHAR] = "SELECT * FROM Mobiltelefoner;";     // SQL command combined with user input
+  /* Ligger kode hen i C variabler */
+  /* Erklærer database handle */
+  sqlite3_stmt *res;
+  int ret;
 
-  sqlite3_exec(db, sql_ori, callback, (void*)data, &zErrMsg);     // Executing SQL command
-  fprintf(stdout, "Operation done successfully\n");         // Prints that it have been succesful
+  sql_data sql[MAX_GROUP];
+  int id = 0;
 
+  ret = sqlite3_prepare_v2(db, "SELECT * FROM Mobiltelefon", -1, &res, NULL);
+  ret = sqlite3_step(res);
 
+  while(ret == SQLITE_ROW){
 
+    sql[id].maerke = sqlite3_column_text(res, 2);  
 
-  /* Mere nyt kode */
+    /* Tester kun for de 20 første */
+    if(id >= 20){
+      break;
+    }
+    
+    sqlite3_step (res);
+    id++;
+    ret = sqlite3_step(res);
+  }
+
+  sqlite3_finalize(res);
+
+  int i;
+  for ( i = 0; i < id; ++i)
+  {
+    printf(" [%d] Name:%s\n", i, sql[i].maerke);
+  }
+
+  /* Lukker database */
+  sqlite3_close(db);
+}
+
+void buy_product(){
+
+  /* */
+  //sqlite3_free();
+
   char tobuy[MAX_CHAR] = "ja";
 
   char *zSQL; 
@@ -73,17 +102,6 @@ int main(int argc, char* argv[]) {
   
   sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg); 
 
-
-
-
-  /* Lukker database */
-  sqlite3_close(db);
-}
-
-void buy_product(){
-
-  /* */
-  //sqlite3_free();
 
   /* sqlite3_snprintf() */
   /* Kan udskrive ting */

@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 	scanf(" %s", input);					// Reads user input
 	// strcpy(input, "pris");				// User input, written manually for testing purposes
 	
-	sprintf(sql_ori, "SELECT * from Mobiltelefon ORDER BY %s", input);	// Combines SQL command with user input
+	sprintf(sql_ori, "INSERT INTO Users (Brugernavn, Password, Critical Value) VALUES ('Jake', 'hej123', 5)");	// Combines SQL command with user input
 
 
 	printf("\nCurrently doing: %s\n", sql_ori);		// Prints what it's sorting by
