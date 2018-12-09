@@ -10,7 +10,7 @@ int main(void) {
   sqlite3 *db;
   int rc;
   char *sql;
-     /* Open database */
+     /* Open database  */
   rc = sqlite3_open("Mobiltelefoner.db", &db);
    
   if( rc ) {
@@ -126,8 +126,6 @@ void iflogin(sqlite3 *db, int *value) {
     sqlite3_finalize(selectstmt);     
   }  
 }
-
-
 void giveValue(int *value) {
   /*Spørgsmål 1*/
   int scan_answer;
@@ -175,7 +173,6 @@ void giveValue(int *value) {
     *value += 3;
   }
 }
-
 static int callback(void *data, int argc, char **argv, char **azColName){
    int i;
    fprintf(stderr, "%s: \n", (const char*)data);
