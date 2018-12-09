@@ -7,9 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sqlite3.h"
-
 #define MAX_CHAR 100
-#define MAX_GROUP 200
+#define MAX_GROUP 300
 
 /* Struct array */
 typedef struct{
@@ -150,8 +149,10 @@ int convert_struct(sql* sql_group, int len, sqlite3 *db, int index, void *data, 
   /* Stepper til den første */
   ret = sqlite3_step(stmt);
 
+  printf("ret: %d --- SQLITE_ROW: %d\n", ret, SQLITE_ROW);
   /* Kører gennem alle SQLITE rows */
   while(ret == SQLITE_ROW){
+  	printf("Index: %d\n", index);
     /* Ligger over i struct*/
     sql_group[index].id = sqlite3_column_int(stmt, 0);
     strcpy(sql_group[index].maerke, sqlite3_column_text(stmt, 1));
@@ -228,8 +229,6 @@ int go_to_item(sql* sql_group, int len, int inputId){
 void list_struct(sql* sql_group, int len){
   /* Printer len af struct */
   int i;
-  for ( i = 1; i < len; ++i)
-  {
+  for (i = 1; i < len; ++i)
     printf("#%d [%d] %s %s --- Pris:%d [%s]\n", i, sql_group[i].id, sql_group[i].maerke, sql_group[i].model, sql_group[i].pris, sql_group[i].date_added);
-  }
 }
