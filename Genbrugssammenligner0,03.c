@@ -15,6 +15,7 @@ static int index = 1;   // Global int for testing purposes (Indexes the phones w
 /* Struct array */
 typedef struct{
   
+  int id;
   char maerke[MAX_CHAR];
   int pris;
 
@@ -78,8 +79,9 @@ int main(int argc, char* argv[]) {
 
   /* */
   while(ret == SQLITE_ROW){
-    strcpy(sql[id].maerke, sqlite3_column_text(stmt, 0));
-    sql[id].pris = sqlite3_column_int(stmt, 3);
+    sql[id].id = sqlite3_column_int(stmt, 0);
+    strcpy(sql[id].maerke, sqlite3_column_text(stmt, 1));
+    sql[id].pris = sqlite3_column_int(stmt, 4);
     
     /* Tester kun for de 20 første */
     if(id >= 20){
@@ -97,7 +99,7 @@ int main(int argc, char* argv[]) {
   int i;
   for ( i = 0; i < id; ++i)
   {
-    printf(" [%d] Name: %s Pris:%d\n", i, sql[i].maerke, sql[i].pris);
+    printf(" ID:%d Maerke: %s Pris:%d\n", sql[i].id, sql[i].maerke, sql[i].pris);
   }
 
   /* Lukker database */
