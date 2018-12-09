@@ -44,8 +44,8 @@ void makeUser(sqlite3 *db, int value) {
   	  scanf(" %s", password);
   	  sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
   	  sqlite3_stmt *selectstmt_three;
-  	  int result_three = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
-      if(result_three == SQLITE_OK) {
+  	  int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
+      if(result == SQLITE_OK) {
         if (sqlite3_step(selectstmt_three) == SQLITE_ROW) {
        	  printf("That password already exists. Type another one\n");
         }
@@ -81,9 +81,9 @@ void makeUser(sqlite3 *db, int value) {
   	  scanf(" %s", password);
 	    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
 	    sqlite3_stmt *selectstmt;
-      int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt, NULL);
+      int result_two = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt, NULL);
       printf("%d\n", result);
-      if(result == SQLITE_OK) {
+      if(result_two == SQLITE_OK) {
         if (sqlite3_step(selectstmt) == SQLITE_ROW) {
        	  user_exist == 1;  
        	  printf("Velkommen %s\n", username);
