@@ -31,89 +31,50 @@ typedef struct{
 /* Prototyper */
 static int callback(void *data, int argc, char **argv, char **azColName);
 int buy_item(sqlite3 *db, int id, void *data, char *zErrMsg);
-int convert_struct(sql sql_group[], int len, sqlite3 *db, int index, void *data, char *zErrMsg, sqlite3_stmt *stmt, char *sql_ori);
 int select_genbrugs_type(char *genbrugstype, char *sql_ori);
 int go_to_item(sql* sql_group, int len, int inputId);
-void list_struct(sql* sql_group, int len);
-void initialize_data(sql db_arr[]);         // Alternativ
+// void list_struct(sql* sql_group, int len);
+// int convert_struct(sql sql_group[], int len, sqlite3 *db, int index, void *data, char *zErrMsg, sqlite3_stmt *stmt, char *sql_ori);
+void initialize_data(sql db_arr[], char *sql_ori);         // Alternativ
 void print_topX(sql db_arr[], int amount);  // Alternativ
 
 int main(int argc, char* argv[]) {
     sqlite3 *db;
+    int len = 5;               // len er hvor mange der skal gemmes i vores struct
+    char sql_ori[MAX_CHAR];
     char *zErrMsg = 0;
-    int rc;
     const char* data = "Callback function called";
-
-    /* Open database */
-    rc = sqlite3_open("Mobiltelefoner.db", &db);
-    
-    if(rc) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        return 0;
-    }else{
-        fprintf(stderr, "Opened database successfully\n");
-    }
-
-    /* Erklærer database handle */
-    sqlite3_stmt *stmt;
-
-    /* Erklærer struct til opbevaring af data */
-    sql sql_group[MAX_GROUP];
-    sql db_arr[MAX_GROUP];   // Alternativ
-    /* Index til vores array af structs */
-    int index = 1;
+    sqlite3_stmt *stmt;             /* Erklærer database handle */
+    sql sql_group[MAX_GROUP];       /* Erklærer struct til opbevaring af data */
 
     /* Lav en funktion til dette for genbrugstype for hvad der skal lægges over i struct -  
     WHERE Dato_Solgt IS NULL sorterer alle solgte fra databasen */
-    char sql_ori[MAX_CHAR];
-
     /* Jakobs kode kommer til at styre denne her funktion */
     select_genbrugs_type("kritisk", sql_ori);
-
-    /* Ligger tingene over i en struct. len er hvor mange der skal gemmes i vores struct */
-    // int len = 20;
-    // convert_struct(sql_group, len, db, index, (void*)data, zErrMsg, stmt, sql_ori);
-    initialize_data(db_arr);
-
-    /* Lister tingene */
-    // list_struct(sql_group, len);
-    print_topX(db_arr, 10);
+    initialize_data(sql_group, sql_ori);        // Ligger tingene over i en struct.
 
     /* Indlæser hvad brugeren har gjort efter go_to_item  */
-    // int go_to_res = 0;
-    
-    // int inputId = 0;
-    // int inputRes;
+    int go_to_res = 0;
+    int inputId = 0;
+    int inputRes;
 
-    // do{
+    do{
+        print_topX(sql_group, len);             // Printer tingene
+        printf("\nWrite an ID to see more details about the product:\n (Type -1 to exit)\n");
+        inputRes = scanf(" %d", &inputId);
 
-    //     printf("Write an ID to see more details about the product:\n");
-    //     inputRes = scanf(" %d", &inputId);
-
-    //     if(inputRes == 1){
-    //         go_to_res = go_to_item(sql_group, len, inputId);
-
-    //         /* Hvis brugeren har indtastet 3 så købes produktet */
-    //         if(go_to_res == 3){
-    //             buy_item(db, sql_group[inputId].id, (void*)data, zErrMsg);
-    //         }
-    //         /* Refresher helt */
-    //         convert_struct(sql_group, len, db, index, (void*)data, zErrMsg, stmt, sql_ori);
-    //         list_struct(sql_group, len);
-
-    //         printf("Type -1 to exit!\n");
-    //     }
-    //     else{
-    //         printf("You did not enter a number, program closes!\n");
-    //         exit(0);
-    //     }
-
-        
-
-    // }while(inputId != -1);
-
-    // /* Lukker database */
-    // sqlite3_close(db);
+        if (inputId == -1)
+            printf("Goodbye!\n");
+        else if(inputRes == 1) {
+            go_to_res = go_to_item(sql_group, len, inputId-1);
+            if(go_to_res == 3)      /* Hvis brugeren har indtastet 3 så købes produktet */
+                buy_item(db, sql_group[inputId].id, (void*)data, zErrMsg);
+        }
+        else {
+            printf("You did not enter a number, program closes!\n");
+            exit(0);
+        }
+    } while(inputId != -1);
 }
 
 static int callback(void *data, int argc, char **argv, char **azColName){
@@ -143,50 +104,18 @@ int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
         return 0;
     }
 }
-/* Funktion til at ligge data fra database over i struct */
-int convert_struct(sql sql_group[], int len, sqlite3 *db, int index, void *data, char *zErrMsg, sqlite3_stmt *stmt, char *sql_ori){
-    sqlite3_prepare_v2(db, sql_ori, -1, &stmt, NULL);
-    sqlite3_step(stmt);   // Stepper til den første
-    
-    for (int index = 0; index < MAX_GROUP; ++index) {       /* Kører gennem alle SQLITE rows */
-        printf("Index: %d\n", index);
-        /* Ligger over i struct*/
-        sql_group[index].id = sqlite3_column_int(stmt, 0);
-        strcpy(sql_group[index].maerke, sqlite3_column_text(stmt, 1));
-        printf("Index0\n");
-        strcpy(sql_group[index].model, sqlite3_column_text(stmt, 2));
-        strcpy(sql_group[index].os, sqlite3_column_text(stmt, 3));
-        sql_group[index].pris = sqlite3_column_int(stmt, 4);
-        printf("Index1\n");
-        strcpy(sql_group[index].farve, sqlite3_column_text(stmt, 5));
-        sql_group[index].mem = sqlite3_column_int(stmt, 6);
-        strcpy(sql_group[index].stand, sqlite3_column_text(stmt, 7));
-        strcpy(sql_group[index].forsikring, sqlite3_column_text(stmt, 8));
-        printf("Index2\n");
-        strcpy(sql_group[index].nemid, sqlite3_column_text(stmt, 9));
-        sql_group[index].postnr = sqlite3_column_int(stmt, 10);
-        strcpy(sql_group[index].date_added, sqlite3_column_text(stmt, 11));
-        //strcpy(sql_group[index].date_sold, sqlite3_column_text(stmt, 12));
-        strcpy(sql_group[index].link, sqlite3_column_text(stmt, 13));
-        printf("Index3\n");
-        sqlite3_step(stmt);     /* Stepper til den næste*/
-    }
-
-    /* Finalizer database handle */
-    sqlite3_finalize(stmt);
-}
 /* Funktion til at vælge genbrugstype */
 int select_genbrugs_type(char *genbrugstype, char *sql_ori){
     /* Switch statement virker ikke til det her ;)  */
     if (strcmp(genbrugstype, "kritisk") == 0) 
     {
         /* Pris */
-        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt IS NULL ORDER BY %s", "Pris");
+        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris");
     } 
     else if (strcmp(genbrugstype, "social") == 0)
     {
         /* Sorterer med postnummer. Postnummer skal have en funktion der kan beregne distance mellem bruger og postnummer */
-        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt IS NULL ORDER BY %s", "Postnummer");
+        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Postnummer");
     }
     /* more else if clauses */
     else /* default: */
@@ -198,11 +127,25 @@ int select_genbrugs_type(char *genbrugstype, char *sql_ori){
 /* Vælger item og man har tre muligheder 1) ingenting 2) gå til siden 3) køb produktet */
 int go_to_item(sql* sql_group, int len, int inputId){
     /* Printer information om varen */
-    printf("Details about #%d:\n ID:%d\n Maerke:%s\n Model:%s\n OS:%s\n Pris:%d\n Farve:%s\n Memory:%d\n Stand:%s\n Forsikring:%s\n NemID verificeret:%s\n Postnummer:%d\n Dato added:%s\n Link:%s \n\n", inputId, sql_group[inputId].id, sql_group[inputId].maerke, sql_group[inputId].model, sql_group[inputId].os, sql_group[inputId].pris, sql_group[inputId].farve, sql_group[inputId].mem, sql_group[inputId].stand, sql_group[inputId].forsikring, sql_group[inputId].nemid, sql_group[inputId].postnr, sql_group[inputId].date_added, sql_group[inputId].link);
+    printf("Details about #%d:\n ID: %d\n Maerke: %s\n Model: %s\n OS: %s\n Pris: %d\n Farve: %s\n Memory: %d\n Stand: %s\n Forsikring: %s\n NemID verificeret: %s\n Postnummer: %d\n Dato added: %s\n Link: %s \n\n"
+        , inputId+1
+        , sql_group[inputId].id
+        , sql_group[inputId].maerke
+        , sql_group[inputId].model
+        , sql_group[inputId].os
+        , sql_group[inputId].pris
+        , sql_group[inputId].farve
+        , sql_group[inputId].mem
+        , sql_group[inputId].stand
+        , sql_group[inputId].forsikring
+        , sql_group[inputId].nemid
+        , sql_group[inputId].postnr
+        , sql_group[inputId].date_added
+        , sql_group[inputId].link);
 
     /* Prompter brugeren for at købe, gå til link eller gå tilbage */
     printf("Type 1 to return\nType 2 to visit page\nType 3 to buy\n->");
-    int select = 0;
+    int select;
     scanf(" %d", &select);
 
     if(select == 1){
@@ -215,19 +158,10 @@ int go_to_item(sql* sql_group, int len, int inputId){
         return 3;
     }
 }
-void list_struct(sql* sql_group, int len){
-    /* Printer len af struct */
-    int i;
-    for (i = 1; i < len; ++i)
-        printf("#%d [%d] %s %s --- Pris:%d [%s]\n", i, sql_group[i].id, sql_group[i].maerke, sql_group[i].model, sql_group[i].pris, sql_group[i].date_added);
-}
-
-
-// Alternativ:
-void initialize_data(sql db_arr[]) {   // Alex's funktion for database til array
+void initialize_data(sql db_arr[], char *sql_ori) {
     sqlite3 *db;                    // Pointer to database
     sqlite3_stmt *stmt;             // Sql in binary
-    char sql_ori[MAX_CHAR] = "SELECT * from Mobiltelefon";  // Selects all entries in database
+    // char sql_ori[MAX_CHAR] = "SELECT * from Mobiltelefon";  // Selects all entries in database
 
     sqlite3_open("Mobiltelefoner.db", &db);     // Opens database
     sqlite3_prepare_v2(db, sql_ori, -1, &stmt, NULL);
@@ -237,16 +171,16 @@ void initialize_data(sql db_arr[]) {   // Alex's funktion for database til array
         db_arr[id].id = sqlite3_column_int(stmt, 0);                        // Saves ID
         strcpy(db_arr[id].maerke, sqlite3_column_text(stmt, 1));            // Saves maerke
         strcpy(db_arr[id].model, sqlite3_column_text(stmt, 2));             // Saves model
-        strcpy(db_arr[id].os, sqlite3_column_text(stmt, 3));       // Saves styresystem
+        strcpy(db_arr[id].os, sqlite3_column_text(stmt, 3));                // Saves styresystem
         db_arr[id].pris = sqlite3_column_int(stmt, 4);                      // Saves pris
         strcpy(db_arr[id].farve, sqlite3_column_text(stmt, 5));             // Saves farve
-        db_arr[id].mem = sqlite3_column_int(stmt, 6);                // Saves hukommelse
+        db_arr[id].mem = sqlite3_column_int(stmt, 6);                       // Saves hukommelse
         strcpy(db_arr[id].stand, sqlite3_column_text(stmt, 7));             // Saves stand
         strcpy(db_arr[id].forsikring, sqlite3_column_text(stmt, 8));        // Saves forsikring
         strcpy(db_arr[id].nemid, sqlite3_column_text(stmt, 9));             // Saves nemid
-        db_arr[id].postnr = sqlite3_column_int(stmt, 10);               // Saves postnummer
-        strcpy(db_arr[id].date_added, sqlite3_column_text(stmt, 11));   // Saves dato_tilføjet
-        strcpy(db_arr[id].date_sold, sqlite3_column_text(stmt, 12));       // Saves dato_solgt
+        db_arr[id].postnr = sqlite3_column_int(stmt, 10);                   // Saves postnummer
+        strcpy(db_arr[id].date_added, sqlite3_column_text(stmt, 11));       // Saves dato_tilføjet
+        strcpy(db_arr[id].date_sold, sqlite3_column_text(stmt, 12));        // Saves dato_solgt
         strcpy(db_arr[id].link, sqlite3_column_text(stmt, 13));             // Saves link
     
         sqlite3_step(stmt);                                         // Selects next entry in Database
@@ -257,7 +191,8 @@ void initialize_data(sql db_arr[]) {   // Alex's funktion for database til array
 }
 void print_topX(sql db_arr[], int amount) {
     for (int i = 0; i < amount; ++i)        // Prints the top 20 results
-        printf("ID: %d - Firma: %s - Mobil: %s %s - Stand: %s \n NemId: %s - Forsikring: %s\n  Pris: %d\n\n"
+        printf("[%d] ID: %d - Firma: %s - Mobil: %s %s - Stand: %s \n  NemId: %s - Forsikring: %s\n  Pris: %dkr\n"
+            , i+1
             , db_arr[i].id
             , db_arr[i].maerke
             , db_arr[i].farve
