@@ -22,26 +22,26 @@ int main(void) {
 int mainFunk() {
     sqlite3 *db;        // Pointer to database
     char *sql_cmd;      // String for sql command
+    int value = 0, status = 0;
+    char scan_answer[MAX_CHAR];
     
     sqlite3_open("Mobiltelefoner.db", &db);    // Opens database
     printf(" --- Opened database successfully --- \n");
 
-    sql_cmd = "SELECT * from User";
-
-    int value = 0, error = 0;
-    char scan_answer[100];
-    printf("1. Login    2. Create an account:");
-    while (error == 0) {
-        scanf("%s", scan_answer);
+    sql_cmd = "SELECT * from User";             // Sql command for selecting every line in the table "User"
+    
+    printf("1. Login    2. Create an account \n-> ");
+    while (status == 0) {
+        scanf(" %s", scan_answer);
         if (strcmp(scan_answer, "1") == 0) {
-            iflogin(db, value);
-            error++;
+            iflogin(db, value);                     // Starts login process
+            status++;                               // Ups by one to exit while loop
         }
-        else if (strcmp(scan_answer, "2") == 0) {
-            ifcreateaccount(db, value);
-            error++;
+        else if (strcmp(scan_answer, "2") == 0) {   
+            ifcreateaccount(db, value);             // Starts account create process
+            status++;                               // Ups by one to exit while loop
         }
-        else
+        else                                        // If the user input was unexpected
             printf("Type 1 to login, 2 to create an account\n");
     }
     return 0;
