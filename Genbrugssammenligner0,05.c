@@ -29,14 +29,11 @@ typedef struct{
     char link[MAX_CHAR];
 }sql;
 
-/* Prototyper */
+/* Prototype af funktioner */
 static int callback(void *data, int argc, char **argv, char **azColName);
-
 int buy_item(sqlite3 *db, int id, void *data, char *zErrMsg);
 int select_genbrugs_type(char *genbrugstype, char *sql_ori);
 int go_to_item(sql* sql_group, int len, int inputId);
-// void list_struct(sql* sql_group, int len);
-// int convert_struct(sql sql_group[], int len, sqlite3 *db, int index, void *data, char *zErrMsg, sqlite3_stmt *stmt, char *sql_ori);
 void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_ori, int len);
 void print_topX(sql db_arr[], int amount);  // Alternativ
 
@@ -119,7 +116,7 @@ int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
     timeinfo = localtime (&rawtime);
 
     strftime(buffer,60,"%d-%m-%Y",timeinfo);
-    
+
     /* SQL statement */
     char sql_test[MAX_CHAR];
     sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='%s' WHERE ID=%d;", buffer, idx);
@@ -215,7 +212,7 @@ void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_or
         strcpy(db_arr[id].date_sold, sqlite3_column_text(stmt, 12));        // Saves dato_solgt
         strcpy(db_arr[id].link, sqlite3_column_text(stmt, 13));             // Saves link
     
-        /* Tester kun for de 20 første */
+        /* Tester kun for de len første */
         if(id >= len){
         break;
         }
