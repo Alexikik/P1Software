@@ -123,6 +123,7 @@ int select_genbrugs_type(char *genbrugstype, char *sql_ori){
         printf("genbrugstype was not defined properly. Exitting program!");
         exit(0);
     }
+    return 0;
 }
 /* Vælger item og man har tre muligheder 1) ingenting 2) gå til siden 3) køb produktet */
 int go_to_item(sql* sql_group, int len, int inputId){
@@ -157,6 +158,7 @@ int go_to_item(sql* sql_group, int len, int inputId){
         printf("Item #%d purchased!\n", inputId);
         return 3;
     }
+    return 0;
 }
 void initialize_data(sql db_arr[], char *sql_ori) {
     sqlite3 *db;                    // Pointer to database
