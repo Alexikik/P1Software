@@ -1,15 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sqlite3.h" 
+#define MAX_CHAR 100
 
 void ifcreateaccount(sqlite3 *db, int value);
 void iflogin(sqlite3 *db, int value) ;
 static int callback(void *data, int argc, char **argv, char **azColName);
 void giveValue(int*);
 int mainFunk();
+int get_value(sqlite3 *db, char password[]);
 
 int main(void) {
-  mainFunk();
+  // mainFunk();
+  sqlite3 *db;
+  printf("test100 = %d\n", get_value(db, "Hejsadu"));
   return 0;
 }
 
@@ -34,7 +38,7 @@ int mainFunk() {
   int scan_answer, error = 0;
   printf("1. Login    2. Create an account:\n");
   while (error == 0) {
-    scanf("%d", &scan_answer);
+    scanf(" %d", &scan_answer);
     if (scan_answer == 1) {
       iflogin(db, value);
       error++;
@@ -62,9 +66,8 @@ void ifcreateaccount(sqlite3 *db, int value) {
     sqlite3_stmt *selectstmt_three;
     int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
     if(result == SQLITE_OK) {
-      if (sqlite3_step(selectstmt_three) == SQLITE_ROW) {
+      if (sqlite3_step(selectstmt_three) == SQLITE_ROW)
         printf("That password already exists. Type another one\n");
-      }
       else {
         password_exist = 0;
         giveValue(&value);
@@ -74,7 +77,7 @@ void ifcreateaccount(sqlite3 *db, int value) {
         if (exit != SQLITE_OK) {
           printf("Error Insert\n");
           sqlite3_free(messageError);
-          }
+        }
         else {
           printf("Records created successfully\nWelcome %s\n", username);
            /*Get value from database into variable here!*/
@@ -188,3 +191,49 @@ static int callback(void *data, int argc, char **argv, char **azColName){
    printf("\n");
    return 0;
 }
+
+int get_value(sqlite3 *db, char password[]) {
+  int value;
+  sqlite3_stmt *stmt;       // Sql in binary
+  char sql_state[MAX_CHAR];
+
+  sprintf(sql_state, "SELECT * from User WHERE Password='%s'", password);
+  sqlite3_open("Mobiltelefoner.db", &db);   // Opens database
+  sqlite3_prepare_v2(db, sql_state, -1, &stmt, NULL);
+  sqlite3_step(stmt);
+
+  value = sqlite3_column_int(stmt, 3);
+  return value;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
