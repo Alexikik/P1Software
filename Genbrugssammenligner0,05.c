@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "sqlite3.h"
 #define MAX_CHAR 100
 #define MAX_GROUP 248
@@ -42,7 +43,7 @@ void print_topX(sql db_arr[], int amount);  // Alternativ
 int main(int argc, char* argv[]) {
     sqlite3 *db;
     int rc;
-    int len = 5;               // len er hvor mange der skal gemmes i vores struct
+    int len = 6;               // len er hvor mange der skal gemmes i vores struct
     char sql_ori[MAX_CHAR];
     char *zErrMsg = 0;
     const char* data = "Callback function called";
@@ -109,12 +110,21 @@ static int callback(void *data, int argc, char **argv, char **azColName){
 int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
     int rc;
 
-    char sql_test[MAX_CHAR];
-    sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='10-12-2018' WHERE ID=%d;", idx);
+    /* Til tid - http://www.cplusplus.com/reference/ctime/strftime/ */
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer [320];
 
-    printf("HER: %s\n", sql_test);
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
 
+    strftime(buffer,60,"%d-%m-%Y",timeinfo);
     
+    /* SQL statement */
+    char sql_test[MAX_CHAR];
+    sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='%s' WHERE ID=%d;", buffer, idx);
+
+    /* Execute sql statement */    
     rc = sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg);
 
     if(rc){
