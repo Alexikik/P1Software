@@ -20,20 +20,13 @@ int main(void) {
 
 
 int mainFunk() {
-    sqlite3 *db;
-    int rc;
-    char *sql;
-         /* Open database  */
-    rc = sqlite3_open("Mobiltelefoner.db", &db);
-     
-    if( rc ) {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        return 0; 
-    } 
-    else
-        fprintf(stderr, "Opened database successfully\n");
+    sqlite3 *db;        // Pointer to database
+    char *sql_cmd;      // String for sql command
+    
+    sqlite3_open("Mobiltelefoner.db", &db);    // Opens database
+    printf(" --- Opened database successfully --- \n");
 
-    sql = "SELECT * from User";
+    sql_cmd = "SELECT * from User";
 
     int value = 0, error = 0;
     char scan_answer[100];
