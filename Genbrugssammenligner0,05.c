@@ -114,6 +114,7 @@ int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
 
     printf("HER: %s\n", sql_test);
 
+    
     rc = sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg);
 
     if(rc){
@@ -230,3 +231,6 @@ void print_topX(sql db_arr[], int amount) {
             , db_arr[i].forsikring
             , db_arr[i].pris);
 }
+
+
+

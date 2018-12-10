@@ -1,12 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sqlite3.h" 
+
 void ifcreateaccount(sqlite3 *db, int value);
 void iflogin(sqlite3 *db, int value) ;
 static int callback(void *data, int argc, char **argv, char **azColName);
 void giveValue(int*);
+int mainFunk();
 
 int main(void) {
+  mainFunk();
+  return 0;
+}
+
+
+int mainFunk() {
   sqlite3 *db;
   int rc;
   char *sql;
@@ -15,17 +23,16 @@ int main(void) {
    
   if( rc ) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    return(0); 
+    return 0; 
   } 
-  else {
+  else
     fprintf(stderr, "Opened database successfully\n");
-  }
 
   sql = "SELECT * from User";
   int value = 0;
 
   int scan_answer, error = 0;
-  printf("1. Login    2. Create an account:");
+  printf("1. Login    2. Create an account:\n");
   while (error == 0) {
     scanf("%d", &scan_answer);
     if (scan_answer == 1) {
@@ -36,12 +43,10 @@ int main(void) {
       ifcreateaccount(db, value);
       error++;
     }
-    else {
+    else
       printf("Type 1 to login, 2 to create an account\n");
   }
-}
   return 0;
-
 }
 void ifcreateaccount(sqlite3 *db, int value) {
   int password_exist = 1, exit;
@@ -53,7 +58,7 @@ void ifcreateaccount(sqlite3 *db, int value) {
   while (password_exist == 1) {
     printf("Type a Password\n");
     scanf(" %s", password);
-    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
+    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s'", password );
     sqlite3_stmt *selectstmt_three;
     int result = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt_three, NULL);
     if(result == SQLITE_OK) {
@@ -71,12 +76,12 @@ void ifcreateaccount(sqlite3 *db, int value) {
           sqlite3_free(messageError);
           }
         else {
-          printf("Records created successfully\nWelcome %s", username);
+          printf("Records created successfully\nWelcome %s\n", username);
            /*Get value from database into variable here!*/
         }       
       }
     }
-      sqlite3_finalize(selectstmt_three);  
+    sqlite3_finalize(selectstmt_three);  
   }
 }
 void iflogin(sqlite3 *db, int value) {
@@ -88,12 +93,12 @@ void iflogin(sqlite3 *db, int value) {
   while (user_exist == 2) {
     printf("Type your Password\n");
     scanf(" %s", password);
-    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s%';", password );
+    sprintf(sql_one, "SELECT * FROM User WHERE Password LIKE '%s'", password );
     sqlite3_stmt *selectstmt;
     int result_two = sqlite3_prepare_v2(db, sql_one, -1, &selectstmt, NULL);
     if(result_two == SQLITE_OK) {
       if (sqlite3_step(selectstmt) == SQLITE_ROW) {
-        user_exist == 1;  
+        user_exist = 1;  
         printf("Velkommen %s\n", username);
         /*Get value from database into variable here!*/
         break;
