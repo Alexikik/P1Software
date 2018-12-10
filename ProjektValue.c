@@ -12,6 +12,8 @@ int main(void) {
   mainFunk();
   return 0;
 }
+
+
 int mainFunk() {
   sqlite3 *db;
   int rc;
@@ -23,15 +25,14 @@ int mainFunk() {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
     return 0; 
   } 
-  else {
+  else
     fprintf(stderr, "Opened database successfully\n");
-  }
 
   sql = "SELECT * from User";
   int value = 0;
 
   int scan_answer, error = 0;
-  printf("1. Login    2. Create an account:");
+  printf("1. Login    2. Create an account:\n");
   while (error == 0) {
     scanf("%d", &scan_answer);
     if (scan_answer == 1) {
@@ -42,9 +43,8 @@ int mainFunk() {
       ifcreateaccount(db, value);
       error++;
     }
-    else {
+    else
       printf("Type 1 to login, 2 to create an account\n");
-    }
   }
   return 0;
 }
@@ -76,12 +76,12 @@ void ifcreateaccount(sqlite3 *db, int value) {
           sqlite3_free(messageError);
           }
         else {
-          printf("Records created successfully\nWelcome %s", username);
+          printf("Records created successfully\nWelcome %s\n", username);
            /*Get value from database into variable here!*/
         }       
       }
     }
-      sqlite3_finalize(selectstmt_three);  
+    sqlite3_finalize(selectstmt_three);  
   }
 }
 void iflogin(sqlite3 *db, int value) {

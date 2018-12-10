@@ -95,6 +95,7 @@ int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
     char sql_test[MAX_CHAR];
     sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='09-12-2018' WHERE ID=%d;", idx);
 
+    
     rc = sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg);
 
     if(rc){
