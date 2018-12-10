@@ -204,3 +204,6 @@ void print_topX(sql db_arr[], int amount) {
             , db_arr[i].forsikring
             , db_arr[i].pris);
 }
+
+
+

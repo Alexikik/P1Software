@@ -1,12 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sqlite3.h" 
+
 void ifcreateaccount(sqlite3 *db, int value);
 void iflogin(sqlite3 *db, int value) ;
 static int callback(void *data, int argc, char **argv, char **azColName);
 void giveValue(int*);
+int mainFunk();
 
 int main(void) {
+  mainFunk();
+  return 0;
+}
+int mainFunk() {
   sqlite3 *db;
   int rc;
   char *sql;
@@ -15,7 +21,7 @@ int main(void) {
    
   if( rc ) {
     fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-    return(0); 
+    return 0; 
   } 
   else {
     fprintf(stderr, "Opened database successfully\n");
