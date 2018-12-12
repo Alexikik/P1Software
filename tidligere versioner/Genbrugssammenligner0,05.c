@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "sqlite3.h"
 #define MAX_CHAR 100
 #define MAX_GROUP 248
@@ -28,19 +29,18 @@ typedef struct{
     char link[MAX_CHAR];
 }sql;
 
-/* Prototyper */
+/* Prototype af funktioner */
 static int callback(void *data, int argc, char **argv, char **azColName);
 int buy_item(sqlite3 *db, int id, void *data, char *zErrMsg);
 int select_genbrugs_type(char *genbrugstype, char *sql_ori);
 int go_to_item(sql* sql_group, int len, int inputId);
-// void list_struct(sql* sql_group, int len);
-// int convert_struct(sql sql_group[], int len, sqlite3 *db, int index, void *data, char *zErrMsg, sqlite3_stmt *stmt, char *sql_ori);
-void initialize_data(sql db_arr[], char *sql_ori);         // Alternativ
+void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_ori, int len);
 void print_topX(sql db_arr[], int amount);  // Alternativ
 
 int main(int argc, char* argv[]) {
     sqlite3 *db;
-    int len = 5;               // len er hvor mange der skal gemmes i vores struct
+    int rc;
+    int len = 6;               // len er hvor mange der skal gemmes i vores struct
     char sql_ori[MAX_CHAR];
     char *zErrMsg = 0;
     const char* data = "Callback function called";
@@ -51,14 +51,26 @@ int main(int argc, char* argv[]) {
     WHERE Dato_Solgt IS NULL sorterer alle solgte fra databasen */
     /* Jakobs kode kommer til at styre denne her funktion */
     select_genbrugs_type("kritisk", sql_ori);
-    initialize_data(sql_group, sql_ori);        // Ligger tingene over i en struct.
 
+    /* Åbner databasen */
+    rc = sqlite3_open("Mobiltelefoner.db", &db);
+  
+    if(rc) {
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        return 0;
+    }else{
+        fprintf(stderr, "Opened database successfully\n");
+    }
+
+    /* Ligger tingene over i en struct. */
+    initialize_data(db, stmt, sql_group, sql_ori, len);  
+     
     /* Indlæser hvad brugeren har gjort efter go_to_item  */
     int go_to_res = 0;
     int inputId = 0;
     int inputRes;
 
-    do{
+    do{ 
         print_topX(sql_group, len);             // Printer tingene
         printf("\nWrite an ID to see more details about the product:\n (Type -1 to exit)\n");
         inputRes = scanf(" %d", &inputId);
@@ -66,15 +78,18 @@ int main(int argc, char* argv[]) {
         if (inputId == -1)
             printf("Goodbye!\n");
         else if(inputRes == 1) {
-            go_to_res = go_to_item(sql_group, len, inputId-1);
+            go_to_res = go_to_item(sql_group, len, inputId);
             if(go_to_res == 3)      /* Hvis brugeren har indtastet 3 så købes produktet */
                 buy_item(db, sql_group[inputId].id, (void*)data, zErrMsg);
+                initialize_data(db, stmt, sql_group, sql_ori, len);   
         }
         else {
             printf("You did not enter a number, program closes!\n");
             exit(0);
         }
     } while(inputId != -1);
+
+    sqlite3_close(db);
 }
 
 static int callback(void *data, int argc, char **argv, char **azColName){
@@ -92,17 +107,28 @@ static int callback(void *data, int argc, char **argv, char **azColName){
 int buy_item(sqlite3 *db, int idx, void *data, char *zErrMsg){
     int rc;
 
-    char sql_test[MAX_CHAR];
-    sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='09-12-2018' WHERE ID=%d;", idx);
+    /* Til tid - http://www.cplusplus.com/reference/ctime/strftime/ */
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer [320];
 
-    
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+
+    strftime(buffer,60,"%d-%m-%Y",timeinfo);
+
+    /* SQL statement */
+    char sql_test[MAX_CHAR];
+    sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='%s' WHERE ID=%d;", buffer, idx);
+
+    /* Execute sql statement */    
     rc = sqlite3_exec(db, sql_test, callback, (void*)data, &zErrMsg);
 
     if(rc){
         printf("FAILED at function: buy_item");
         return 1;
     }else{
-        return 0;
+        return 0; 
     }
 }
 /* Funktion til at vælge genbrugstype */
@@ -111,12 +137,12 @@ int select_genbrugs_type(char *genbrugstype, char *sql_ori){
     if (strcmp(genbrugstype, "kritisk") == 0) 
     {
         /* Pris */
-        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris");
+        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s;", "Pris");
     } 
     else if (strcmp(genbrugstype, "social") == 0)
     {
         /* Sorterer med postnummer. Postnummer skal have en funktion der kan beregne distance mellem bruger og postnummer */
-        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Postnummer");
+        sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s;", "Postnummer");
     }
     /* more else if clauses */
     else /* default: */
@@ -130,7 +156,7 @@ int select_genbrugs_type(char *genbrugstype, char *sql_ori){
 int go_to_item(sql* sql_group, int len, int inputId){
     /* Printer information om varen */
     printf("Details about #%d:\n ID: %d\n Maerke: %s\n Model: %s\n OS: %s\n Pris: %d\n Farve: %s\n Memory: %d\n Stand: %s\n Forsikring: %s\n NemID verificeret: %s\n Postnummer: %d\n Dato added: %s\n Link: %s \n\n"
-        , inputId+1
+        , inputId
         , sql_group[inputId].id
         , sql_group[inputId].maerke
         , sql_group[inputId].model
@@ -161,16 +187,16 @@ int go_to_item(sql* sql_group, int len, int inputId){
     }
     return 0;
 }
-void initialize_data(sql db_arr[], char *sql_ori) {
-    sqlite3 *db;                    // Pointer to database
-    sqlite3_stmt *stmt;             // Sql in binary
-    // char sql_ori[MAX_CHAR] = "SELECT * from Mobiltelefon";  // Selects all entries in database
 
-    sqlite3_open("Mobiltelefoner.db", &db);     // Opens database
+void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_ori, int len) {
+    int ret;
+
     sqlite3_prepare_v2(db, sql_ori, -1, &stmt, NULL);
-    sqlite3_step(stmt);
+    ret = sqlite3_step(stmt);
     
-    for (int id = 0; id < MAX_GROUP; ++id) {
+    int id = 0;
+
+    while(ret == SQLITE_ROW){
         db_arr[id].id = sqlite3_column_int(stmt, 0);                        // Saves ID
         strcpy(db_arr[id].maerke, sqlite3_column_text(stmt, 1));            // Saves maerke
         strcpy(db_arr[id].model, sqlite3_column_text(stmt, 2));             // Saves model
@@ -186,16 +212,23 @@ void initialize_data(sql db_arr[], char *sql_ori) {
         strcpy(db_arr[id].date_sold, sqlite3_column_text(stmt, 12));        // Saves dato_solgt
         strcpy(db_arr[id].link, sqlite3_column_text(stmt, 13));             // Saves link
     
-        sqlite3_step(stmt);                                         // Selects next entry in Database
+        /* Tester kun for de len første */
+        if(id >= len){
+        break;
+        }
+    
+        /* Tæller id op med 1, så vi har en specifik plads i vores array af structs */
+        id++;
+        /* Stepper til den næste*/
+        ret = sqlite3_step(stmt);
     }
 
     sqlite3_finalize(stmt);     // Idk, it may close something?
-    sqlite3_close(db);          // Closes the database
 }
 void print_topX(sql db_arr[], int amount) {
-    for (int i = 0; i < amount; ++i)        // Prints the top 20 results
+    for (int i = 1; i < amount; ++i)        // Prints the top 20 results
         printf("[%d] ID: %d - Firma: %s - Mobil: %s %s - Stand: %s \n  NemId: %s - Forsikring: %s\n  Pris: %dkr\n"
-            , i+1
+            , i
             , db_arr[i].id
             , db_arr[i].maerke
             , db_arr[i].farve
