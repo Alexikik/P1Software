@@ -31,7 +31,7 @@ typedef struct{
 }sql;
 
 /* Prototype af funktioner */
-void genbrugsvare(int users_crit_val, sqlite3 *db);
+void genbrugsvare(int user_group, sqlite3 *db);
 static int callback(void *data, int argc, char **argv, char **azColName);
 int buy_item(sqlite3 *db, int id);
 int select_genbrugs_type(char *genbrugstype, char *sql_ori);
@@ -42,6 +42,7 @@ void print_topX(sql db_arr[], int amount);  // Alternativ
 int ifcreateaccount(sqlite3 *db);
 int iflogin(sqlite3 *db);
 int giveValue();
+int give_group();
 int answer_to_points();
 int login_system(sqlite3 *db);
 int get_value(sqlite3 *db, char password[]);
@@ -49,7 +50,7 @@ int get_value(sqlite3 *db, char password[]);
 
 int main(int argc, char* argv[]) {
 	sqlite3 *db;
-	int rc, users_crit_val;               	// len er hvor mange der skal gemmes i vores struct
+	int rc, user_group;               	// len er hvor mange der skal gemmes i vores struct
 
 	rc = sqlite3_open("Mobiltelefoner.db", &db);    	/* Åbner databasen */
 	if(rc) {
@@ -58,15 +59,15 @@ int main(int argc, char* argv[]) {
 	}else
 		fprintf(stderr, "Opened database successfully\n");
 
-	users_crit_val = login_system(db);		// Logs in the user and retrieves his/her critical value
-	printf("Din kritiske vaerdi er: %d\n", users_crit_val);
-	genbrugsvare(users_crit_val, db);		// Genbrugssammenligner
+	user_group = login_system(db);		// Logs in the user and retrieves his/her critical value
+	printf("Din gruppe er: %d\n", user_group);
+	genbrugsvare(user_group, db);		// Genbrugssammenligner
 
 	sqlite3_close(db);						// Closes the database
 }
 
 /* Funktioner til genbrugssammenligner */
-void genbrugsvare(int users_crit_val, sqlite3 *db) {
+void genbrugsvare(int user_group, sqlite3 *db) {
 	sqlite3_stmt *stmt;             /* Erklærer database handle */
 	sql sql_group[MAX_GROUP];       /* Erklærer struct til opbevaring af data */
 	int rc, len = 6;               // len er hvor mange der skal gemmes i vores struct
@@ -279,7 +280,7 @@ int ifcreateaccount(sqlite3 *db) {
 			printf("That username or password already exists. Type another one\n");
 		else {                                          // If it doesn't
 			user_exists = 1;
-			value = giveValue();
+			value = give_group();
 			sprintf(sql_cmd, "INSERT INTO User VALUES(null, '%s', '%s', %d)", username, password, value);
 			exit = sqlite3_exec(db, sql_cmd, NULL, 0, &messageError);
 			if (exit != SQLITE_OK) {
@@ -353,6 +354,50 @@ int giveValue() {
 	value += answer_to_points();
 
 	return value;
+}
+int give_group() {
+	int group, spg1, spg2, spg3;
+
+	/*Spørgsmål 1*/
+	printf("%s%s%s%s%s", "Du faar nogle spoergsmaal som vil hjaelpe programmet med at finde de bedste produkter for dig\n",
+					" Hvor vigtigt er det at du kan besoege saelger naar du koeber genbrugte varer?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg1 = answer_to_points();
+
+	/*Spørgsmål 2*/
+	printf("%s%s%s%s", "\n\nHvor vigtig er standen af varen, naar du koeber genbrug?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg2 = answer_to_points();
+
+	/*Spørgsmål 3*/
+	printf("%s%s%s%s", "\n\nHvor vigtig er sikkerhed for dig, naar du koeber genbrugte varer?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg3 = answer_to_points();
+
+	if (spg1 > spg2 && spg1 > spg3)				// If question 1 got the greatest rating
+		group = 1;		// Group 1
+	else if (spg2 > spg1 && spg2 > spg3)		// If question 2 got the greatest rating
+		group = 2;		// Group 2
+	else if (spg3 > spg1 && spg3 > spg2)		// If question 3 got the greatest rating
+		group = 3;		// Group 3
+	else if (spg1 == spg2 && spg1 == spg3)		// If all questions got the same rating
+		group = 0;		// Group_neutral
+	else if (spg1 == spg2 && spg1 > spg3)		// If 1 and 2 question got the same, and it's greater than 3
+		group = 12;		// Group 1 and 2
+	else if (spg1 == spg3 && spg1 > spg2)		// If 1 and 3 question got the same, and it's greater than 2
+		group = 13;		// Group 1 and 3
+	else if (spg2 == spg3 && spg2 > spg1)		// If 2 and 3 question got the same, and it's greater than 1
+		group = 23;		// Group 2 and 3
+	else 									// Default for testing
+		group = 99;		// Error
+
+	return group;
 }
 int answer_to_points() {
 	int value = 0;
