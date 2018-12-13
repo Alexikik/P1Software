@@ -12,6 +12,7 @@ Genbrugssammenligner0,04.c		List af items og buy_item funktion implementeret
 Genbrugssammenligner0,05.c		Fixes and simplifies 0,04 to work with new db and added correct time when items bought
 GenbrugssammenlignerML0,10.c  		Login systemet blev implementeret og flere bugfixes og simplificeringer
 GenbrugssammenlignerML0,13.c		Opdateret spørgsmål til at finde genbrugsgruppen, og små ændringer i databasen, da postnumemr nu også gemmes og filtreres efter.
+GenbrugssammenlignerML0,20.c		Nyt system til at give sql commands ud fra genbrugs gruppe
 
-To do in 0,14.c:
+To do in 0,21.c:
 fix æ,ø,å i listen
