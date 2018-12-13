@@ -31,25 +31,26 @@ typedef struct{
 }sql;
 
 /* Prototype af funktioner */
-void genbrugsvare(int users_crit_val, sqlite3 *db);
+void genbrugsvare(int user_group, sqlite3 *db);
 static int callback(void *data, int argc, char **argv, char **azColName);
 int buy_item(sqlite3 *db, int id);
-int select_genbrugs_type(char *genbrugstype, char *sql_ori);
+void select_genbrugs_type(int user_group, char *sql_ori);
 int go_to_item(sql* sql_group, int len, int inputId, sqlite3 *db, sqlite3_stmt *stmt, char *sql_ori);
 void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_ori, int len);
-void print_topX(sql db_arr[], int amount);  // Alternativ
+void print_topX(sql db_arr[], int amount);
 /* Funktioner til login */
 int ifcreateaccount(sqlite3 *db);
 int iflogin(sqlite3 *db);
-int giveValue();
+int giveValue();	// Delete me
+int give_group();
 int answer_to_points();
 int login_system(sqlite3 *db);
-int get_value(sqlite3 *db, char password[]);
+int get_group(sqlite3 *db, char password[], char username[]);
 
 
 int main(int argc, char* argv[]) {
 	sqlite3 *db;
-	int rc, users_crit_val;               	// len er hvor mange der skal gemmes i vores struct
+	int rc, user_group;               	// len er hvor mange der skal gemmes i vores struct
 
 	rc = sqlite3_open("Mobiltelefoner.db", &db);    	/* Åbner databasen */
 	if(rc) {
@@ -58,15 +59,15 @@ int main(int argc, char* argv[]) {
 	}else
 		fprintf(stderr, "Opened database successfully\n");
 
-	users_crit_val = login_system(db);		// Logs in the user and retrieves his/her critical value
-	printf("Din kritiske vaerdi er: %d\n", users_crit_val);
-	genbrugsvare(users_crit_val, db);		// Genbrugssammenligner
+	user_group = login_system(db);		// Logs in the user and retrieves his/her critical value
+	printf("Din gruppe er: %d\n", user_group);
+	genbrugsvare(user_group, db);		// Genbrugssammenligner
 
 	sqlite3_close(db);						// Closes the database
 }
 
 /* Funktioner til genbrugssammenligner */
-void genbrugsvare(int users_crit_val, sqlite3 *db) {
+void genbrugsvare(int user_group, sqlite3 *db) {
 	sqlite3_stmt *stmt;             /* Erklærer database handle */
 	sql sql_group[MAX_GROUP];       /* Erklærer struct til opbevaring af data */
 	int rc, len = 6;               // len er hvor mange der skal gemmes i vores struct
@@ -74,7 +75,7 @@ void genbrugsvare(int users_crit_val, sqlite3 *db) {
 	/* Lav en funktion til dette for genbrugstype for hvad der skal lægges over i struct -  
 	WHERE Dato_Solgt IS NULL sorterer alle solgte fra databasen */
 	/* Jakobs kode kommer til at styre denne her funktion */
-	select_genbrugs_type("kritisk", sql_ori);
+	select_genbrugs_type(user_group, sql_ori);
 
 	initialize_data(db, stmt, sql_group, sql_ori, len);     /* Ligger tingene over i en struct. */
 	 
@@ -131,19 +132,30 @@ int buy_item(sqlite3 *db, int idx){
 	else
 		return 1; 	// Buy item was succesful
 }
-/* Funktion til at vælge genbrugstype */
-int select_genbrugs_type(char *genbrugstype, char *sql_ori){
+/* Funktion til at vælge user_group */
+void select_genbrugs_type(int user_group, char *sql_ori){
+	
+	if (user_group == 0)
+		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris");
+	else if (user_group == 1)
+		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris"); 	// XXX
+	else if (user_group == 2)
+		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' AND (Stand='God' OR Stand='Perfekt') ORDER BY %s", "Pris");	// Done
+	else if (user_group == 3)
+		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris"); 	// XXX
+	else 
+		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s", "Pris");
+
 	/* Switch statement virker ikke til det her ;)  */
-	if (strcmp(genbrugstype, "kritisk") == 0) 	/* Pris */
+	/*if (strcmp(user_group, "kritisk") == 0) 	// Pris
 		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s;", "Pris");
-	else if (strcmp(genbrugstype, "social") == 0)	/* Sorterer med postnummer. Postnummer skal have en funktion der kan beregne distance mellem bruger og postnummer */
+	else if (strcmp(user_group, "social") == 0)	 // Sorterer med postnummer. Postnummer skal have en funktion der kan beregne distance mellem bruger og postnummer 
 		sprintf(sql_ori, "SELECT * from Mobiltelefon WHERE Dato_Solgt='NULL' ORDER BY %s;", "Postnummer");
-	/* more else if clauses */
-	else {		/* default: */
-		printf("genbrugstype was not defined properly. Exitting program!");
+	// more else if clauses
+	else {		// default: 
+		printf("user_group was not defined properly. Exitting program!");
 		exit(0);
-	}
-	return 0;
+	}*/
 }
 /* Vælger item og man har tre muligheder 1) ingenting 2) gå til siden 3) køb produktet */
 int go_to_item(sql* sql_group, int len, int inputId, sqlite3 *db, sqlite3_stmt *stmt, char *sql_ori){
@@ -279,7 +291,7 @@ int ifcreateaccount(sqlite3 *db) {
 			printf("That username or password already exists. Type another one\n");
 		else {                                          // If it doesn't
 			user_exists = 1;
-			value = giveValue();
+			value = give_group();
 			sprintf(sql_cmd, "INSERT INTO User VALUES(null, '%s', '%s', %d)", username, password, value);
 			exit = sqlite3_exec(db, sql_cmd, NULL, 0, &messageError);
 			if (exit != SQLITE_OK) {
@@ -313,7 +325,7 @@ int iflogin(sqlite3 *db) {
 		if (sqlite3_step(selectstmt) == SQLITE_ROW) {
 			printf("Velkommen %s\n", username);
 			sqlite3_finalize(selectstmt);
-			return get_value(db, password);
+			return get_group(db, password, username);
 		}
 		else {
 			printf("Du er ikke oprettet i systemet. Tastede du forkert?\n Tast 1 for at oprette en ny konto, tast 0 for at proeve igen\n");
@@ -326,7 +338,7 @@ int iflogin(sqlite3 *db) {
 		}
 	}
 }
-int giveValue() {
+int giveValue() {		// Delete me
 	int value = 0, start_over = 0;
 	char scan_answer[MAX_CHAR];
 
@@ -354,6 +366,50 @@ int giveValue() {
 
 	return value;
 }
+int give_group() {
+	int group, spg1, spg2, spg3;
+
+	/*Spørgsmål 1*/
+	printf("%s%s%s%s%s", "Du faar nogle spoergsmaal som vil hjaelpe programmet med at finde de bedste produkter for dig\n",
+					" Hvor vigtigt er det at du kan besoege saelger naar du koeber genbrugte varer?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg1 = answer_to_points();
+
+	/*Spørgsmål 2*/
+	printf("%s%s%s%s", "\n\nHvor vigtig er standen af varen, naar du koeber genbrug?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg2 = answer_to_points();
+
+	/*Spørgsmål 3*/
+	printf("%s%s%s%s", "\n\nHvor vigtig er sikkerhed for dig, naar du koeber genbrugte varer?\n",
+					"  1. Ligegyldigt\n",
+					"  2. Lille betydning\n",
+					"  3. Stor betydning\n-> ");
+	spg3 = answer_to_points();
+
+	if (spg1 > spg2 && spg1 > spg3)				// If question 1 got the greatest rating
+		group = 1;		// Group 1
+	else if (spg2 > spg1 && spg2 > spg3)		// If question 2 got the greatest rating
+		group = 2;		// Group 2
+	else if (spg3 > spg1 && spg3 > spg2)		// If question 3 got the greatest rating
+		group = 3;		// Group 3
+	else if (spg1 == spg2 && spg1 == spg3)		// If all questions got the same rating
+		group = 0;		// Group_neutral
+	else if (spg1 == spg2 && spg1 > spg3)		// If 1 and 2 question got the same, and it's greater than 3
+		group = 12;		// Group 1 and 2
+	else if (spg1 == spg3 && spg1 > spg2)		// If 1 and 3 question got the same, and it's greater than 2
+		group = 13;		// Group 1 and 3
+	else if (spg2 == spg3 && spg2 > spg1)		// If 2 and 3 question got the same, and it's greater than 1
+		group = 23;		// Group 2 and 3
+	else 									// Default for testing
+		group = 99;		// Error
+
+	return group;
+}
 int answer_to_points() {
 	int value = 0;
 	char scan_answer[MAX_CHAR];
@@ -371,12 +427,12 @@ int answer_to_points() {
 	}
 	return value;
 }
-int get_value(sqlite3 *db, char password[]) {
+int get_group(sqlite3 *db, char password[], char username[]) {
 	int value;
 	sqlite3_stmt *stmt;       // Sql in binary
 	char sql_state[MAX_CHAR];
 
-	sprintf(sql_state, "SELECT * from User WHERE Password='%s'", password);
+	sprintf(sql_state, "SELECT * from User WHERE Password='%s' AND Username='%s'", password, username);
 	sqlite3_prepare_v2(db, sql_state, -1, &stmt, NULL);
 	sqlite3_step(stmt);
 
