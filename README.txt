@@ -13,6 +13,7 @@ Genbrugssammenligner0,05.c		Fixes and simplifies 0,04 to work with new db and ad
 GenbrugssammenlignerML0,10.c  		Login systemet blev implementeret og flere bugfixes og simplificeringer
 GenbrugssammenlignerML0,13.c		Opdateret spørgsmål til at finde genbrugsgruppen, og små ændringer i databasen, da postnumemr nu også gemmes og filtreres efter.
 GenbrugssammenlignerML0,20.c		Nyt system til at give sql commands ud fra genbrugs gruppe
+GenbrugssammenlignerML0,21.c		Filter system, mangler dog stadig nogle ændringer, så man kan nulstille sine gruppe-filtre
 
 To do in 0,21.c:
 fix æ,ø,å i listen
