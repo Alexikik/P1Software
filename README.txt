@@ -1,4 +1,4 @@
-﻿# Hvordan bruger man programmet?
+# Hvordan bruger man programmet?
 
 Dette er et program som søger efter ting i en database afhængigt af hvilken genbrugstype du er. Derfra kommer navnet genbrugsmatcher. Programmets funktion ligger i at søge efter specifikke ting fra en liste konfigureret til den givne genbrugstype. Hvis brugeren ønsker at tilgå et produkt, bliver der yderligere mulighed for at 3) 'købe produktet', 2) 'besøg produkt siden' eller 1) 'returnere til listen'.
 
@@ -16,6 +16,4 @@ GenbrugssammenlignerML0,20.c		Nyt system til at give sql commands ud fra genbrug
 GenbrugssammenlignerML0,21.c		Filter system, mangler dog stadig nogle ændringer, så man kan nulstille sine gruppe-filtre
 GenbrugssammenlignerML0,30.c		Filter system færdig implementeret
 GenbrugssammenlignerML0,31.c		Changed all comments to english
-
-To do in 0,31.c:
-fix æ,ø,å i listen
+GenbrugssammenlignerML0,32.c		Changed print language to Danish
