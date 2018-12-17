@@ -66,7 +66,6 @@ int answer_to_points();
 struct user_typ login_system(sqlite3 *db);
 struct user_typ get_group(sqlite3 *db, char password[], char username[]);
 
-'char'
 int main(int argc, char* argv[]) {
 	sqlite3 *db;
 	int rc;
