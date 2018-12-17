@@ -50,7 +50,6 @@ typedef struct{
 
 /* Prototypes for Genbrug */
 void genbrugsvare(struct user_typ user, sqlite3 *db);
-static int callback(void *data, int argc, char **argv, char **azColName);
 int buy_item(sqlite3 *db, int id);
 void change_filters(filter_typ *filters_arr);
 void filter_to_sql(filter_typ *filters_arr, char *filter_str, struct user_typ user);
@@ -124,15 +123,6 @@ void genbrugsvare(struct user_typ user, sqlite3 *db) {
 		}
 	} while(inputId != -1);
 }
-static int callback(void *data, int argc, char **argv, char **azColName){
-	int i;
-	printf("Wubba Lubba Dub Dub\n");
-	for(i = 0; i<argc; i++)
-		printf("%s: %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-	 
-	printf("\n");
-	return 0;
-}
 int buy_item(sqlite3 *db, int idx){		/* Function marks items as bought in the database*/
 	int rc;
 	time_t rawtime;
@@ -149,7 +139,7 @@ int buy_item(sqlite3 *db, int idx){		/* Function marks items as bought in the da
 	sprintf(sql_test, "UPDATE Mobiltelefon SET Dato_Solgt='%s' WHERE ID=%d", buffer, idx);
 
 	/* Execute sql statement */    
-	rc = sqlite3_exec(db, sql_test, callback, NULL, NULL);
+	rc = sqlite3_exec(db, sql_test, NULL, NULL, NULL);
 
 	if(rc)
 		return 0;	// Buy item wasn't succesful
@@ -405,7 +395,7 @@ void initialize_data(sqlite3* db, sqlite3_stmt *stmt, sql db_arr[], char *sql_or
 	int id = 1;
 
 	for (id = 1; id < len; ++id) {
-		if (ret == 101) {
+		if (ret == SQLITE_DONE) {
 			for (int i = id; i < len; ++i)
 				db_arr[i].pris = 0;                      // Saves pris
 			break;
