@@ -1,4 +1,4 @@
-# Hvordan bruger man programmet?
+﻿# Hvordan bruger man programmet?
 
 Dette er et program som søger efter ting i en database afhængigt af hvilken genbrugstype du er. Derfra kommer navnet genbrugsmatcher. Programmets funktion ligger i at søge efter specifikke ting fra en liste konfigureret til den givne genbrugstype. Hvis brugeren ønsker at tilgå et produkt, bliver der yderligere mulighed for at 3) 'købe produktet', 2) 'besøg produkt siden' eller 1) 'returnere til listen'.
 
@@ -22,4 +22,4 @@ GenbrugssammenlignerML0,31.c		Changed all comments to english
 GenbrugssammenlignerML0,32.c		Changed print language to Danish
 GenbrugssammenlignerML0,33.c		Added finalize two places
 
-
+GenbrugssammenlignerML1,00.c		Added functionality to login anonymously and some layout changes
