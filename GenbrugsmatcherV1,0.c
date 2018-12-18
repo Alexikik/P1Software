@@ -351,7 +351,7 @@ int go_to_item(sql* sql_group, int len, int inputId, sqlite3 *db, sqlite3_stmt *
 	/* Chooses an item, then there's 3 options, 1) nothing 2) go back 3) buy product */
 	int buy_item_status;
 	/* Prints information about the product */
-	printf("Detaljer om #%d:\n ID: %d\n Maerke: %s\n Model: %s\n Styresystem: %s\n Pris: %dkr\n Farve: %s\n Memory: %dgb\n Stand: %s\n Forsikring: %s\n NemID verificeret: %s\n Postnummer: %s\n Dato tilfoejet: %s\n Link: %s \n\n"
+	printf("Detaljer om #%d:\n ID: %d\n Maerke: %s\n Model: %s\n Styresystem: %s\n Pris: %dkr\n Farve: %s\n Hukommelse: %dgb\n Stand: %s\n Forsikring: %s\n NemID verificeret: %s\n Postnummer: %s\n Dato tilfoejet: %s\n Link: %s \n\n"
 		, inputId
 		, sql_group[inputId].id
 		, sql_group[inputId].maerke
