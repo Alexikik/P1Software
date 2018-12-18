@@ -348,7 +348,7 @@ void initial_filters_by_group(filter_typ *filters_arr, struct user_typ user) {
 	}
 }
 int go_to_item(sql* sql_group, int len, int inputId, sqlite3 *db, sqlite3_stmt *stmt, char *sql_ori){
-	/* Chooses an item, then there's 3 options, 1) nothing 2) go back 3) buy product */
+	/* Chooses an item, then there's 3 options, 1) go back 2) go to link 3) buy product */
 	int buy_item_status;
 	/* Prints information about the product */
 	printf("Detaljer om #%d:\n ID: %d\n Maerke: %s\n Model: %s\n Styresystem: %s\n Pris: %dkr\n Farve: %s\n Hukommelse: %dgb\n Stand: %s\n Forsikring: %s\n NemID verificeret: %s\n Postnummer: %s\n Dato tilfoejet: %s\n Link: %s \n\n"
@@ -367,7 +367,7 @@ int go_to_item(sql* sql_group, int len, int inputId, sqlite3 *db, sqlite3_stmt *
 		, sql_group[inputId].date_added
 		, sql_group[inputId].link);
 
-	/* Prompts the user to buy, go to link or go back */
+	/* Prompts the user to go back, go to link or to buy */
 	printf("Tast [1] for at gaa tilbage\nTast [2] for at gaa til produktets hjemmeside\nTast [3] for at koebe\n-> ");
 	int select;
 	scanf(" %d", &select);
